@@ -1,61 +1,47 @@
-// ===== Socket.IO 接続 =====
 const socket = io();
+let roomId = "";
 
-// ===== HTML要素取得 =====
-const joinBtn = document.getElementById("joinBtn");
-const attackBtn = document.getElementById("attackBtn");
-const healBtn = document.getElementById("healBtn");
-const logDiv = document.getElementById("log");
+const sounds = {
+  attack: new Audio("sounds/attack.mp3"),
+  heal: new Audio("sounds/heal.mp3"),
+  mystery: new Audio("sounds/mystery.mp3")
+};
 
-const hpMain = document.getElementById("hpMain");
-const hpSub = document.getElementById("hpSub");
+document.getElementById("join").onclick = () => {
+  roomId = room.value;
+  socket.emit("join", roomId);
+};
 
-const cardImg = document.getElementById("cardImg");
-const cardText = document.getElementById("cardText");
+document.getElementById("draw").onclick = () => {
+  socket.emit("draw", roomId);
+};
 
-// ===== 参加 =====
-joinBtn.addEventListener("click", () => {
-  socket.emit("join");
-});
-
-// ===== 行動ボタン =====
-attackBtn.addEventListener("click", () => {
-  socket.emit("action", { type: "attack" });
-});
-
-healBtn.addEventListener("click", () => {
-  socket.emit("action", { type: "heal" });
-});
-
-// ===== サーバー状態を受信 =====
-socket.on("state", (state) => {
+socket.on("state", state => {
   const me = state.players.find(p => p.id === socket.id);
+  document.getElementById("turn").innerText =
+    `ターン：${state.players[state.turn]?.id === socket.id ? "あなた" : "相手"}`;
 
-  if (!me) return;
+  const img = document.getElementById("cardImg");
+  if (me?.card) {
+    img.src = `cards/${me.card.type}.png`;
+    sounds[me.card.type]?.play();
+  } else img.src = "";
 
-  // ===== HP表示 =====
-  hpMain.innerText = `メインHP: ${me.hp}`;
-  hpSub.innerText = `サブHP: ${me.subHp}`;
+  const players = document.getElementById("players");
+  players.innerHTML = "";
 
-  // ===== カード表示（←質問のコード含む） =====
-  if (me.card) {
-    cardImg.src = `cards/${me.card.type}.png`;
-    cardText.innerText = me.card.type;
-  } else {
-    cardImg.src = "";
-    cardText.innerText = "";
-  }
-
-  // ===== ターン制御（自分のターンだけ操作可能） =====
-  const myTurn = state.turnPlayerId === socket.id;
-  attackBtn.disabled = !myTurn;
-  healBtn.disabled = !myTurn;
-
-  // ===== ログ表示 =====
-  logDiv.innerHTML = "";
-  state.log.forEach(line => {
-    const p = document.createElement("div");
-    p.innerText = line;
-    logDiv.appendChild(p);
+  state.players.forEach(p => {
+    const b = document.createElement("button");
+    b.innerText = `HP:${p.hp}`;
+    b.disabled = !me?.card || state.players[state.turn].id !== socket.id;
+    b.onclick = () =>
+      socket.emit("use", { roomId, targetId: p.id });
+    players.appendChild(b);
   });
+
+  document.body.classList.add("flash");
+  setTimeout(() => document.body.classList.remove("flash"), 300);
+
+  document.getElementById("log").innerHTML =
+    state.log.slice(-5).join("<br>");
 });

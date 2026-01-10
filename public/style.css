@@ -1,15 +1,18 @@
-@keyframes shake{
-  0%{transform:translate(0)}
-  25%{transform:translate(5px)}
-  50%{transform:translate(-5px)}
-  75%{transform:translate(5px)}
+body.flash {
+  animation: flash 0.3s;
 }
-.shake{animation:shake 0.4s}
 
-.flash{
-  animation:flash 0.3s;
+@keyframes flash {
+  from { background: white; }
+  to { background: black; }
 }
-@keyframes flash{
-  from{background:#fff}
-  to{background:#000}
+
+#card img {
+  width: 120px;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
 }
