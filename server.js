@@ -8,28 +8,52 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 
-let players = [];
-let gameState = {
-  turn: 0,
-  log: []
-};
+const rooms = {};
 
 io.on("connection", (socket) => {
-  console.log("接続:", socket.id);
 
-  players.push(socket.id);
+  socket.on("join", ({ room, name }) => {
+    socket.join(room);
 
-  io.emit("sync", { players, gameState });
+    if (!rooms[room]) {
+      rooms[room] = {
+        players: [],
+        turn: 0,
+        log: []
+      };
+    }
 
-  socket.on("action", (msg) => {
-    gameState.log.push(msg);
-    gameState.turn = (gameState.turn + 1) % players.length;
-    io.emit("sync", { players, gameState });
+    rooms[room].players.push({
+      id: socket.id,
+      name,
+      hp: 20
+    });
+
+    io.to(room).emit("sync", rooms[room]);
+  });
+
+  socket.on("attack", (room) => {
+    const game = rooms[room];
+    if (!game) return;
+
+    const attacker = game.players[game.turn];
+    const targetIndex = (game.turn + 1) % game.players.length;
+    const target = game.players[targetIndex];
+
+    target.hp -= 3;
+
+    game.log.push(`${attacker.name} が ${target.name} を攻撃！ (-3)`);
+
+    game.turn = (game.turn + 1) % game.players.length;
+
+    io.to(room).emit("sync", game);
   });
 
   socket.on("disconnect", () => {
-    players = players.filter(id => id !== socket.id);
-    io.emit("sync", { players, gameState });
+    for (const room in rooms) {
+      rooms[room].players = rooms[room].players.filter(p => p.id !== socket.id);
+      io.to(room).emit("sync", rooms[room]);
+    }
   });
 });
 

@@ -2,18 +2,26 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Godfield</title>
+  <title>Godfield Online</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="game">
-    <h1>Godfield</h1>
-    <div id="info"></div>
-    <button onclick="sendAction()">行動する</button>
-    <ul id="log"></ul>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="main.js"></script>
+<div id="join">
+  <h1>Godfield</h1>
+  <input id="name" placeholder="名前">
+  <input id="room" placeholder="部屋ID">
+  <button onclick="join()">参加</button>
+</div>
+
+<div id="game" class="hidden">
+  <h2 id="turn"></h2>
+  <div id="players"></div>
+  <button onclick="attack()">攻撃</button>
+  <ul id="log"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

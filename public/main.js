@@ -1,19 +1,44 @@
 const socket = io();
+let currentRoom = "";
 
-const info = document.getElementById("info");
-const log = document.getElementById("log");
+const joinDiv = document.getElementById("join");
+const gameDiv = document.getElementById("game");
+const playersDiv = document.getElementById("players");
+const logUl = document.getElementById("log");
+const turnH2 = document.getElementById("turn");
 
-socket.on("sync", (data) => {
-  info.innerText = `参加人数: ${data.players.length} / ターン: ${data.gameState.turn + 1}`;
+function join() {
+  const name = document.getElementById("name").value;
+  const room = document.getElementById("room").value;
 
-  log.innerHTML = "";
-  data.gameState.log.forEach(l => {
+  if (!name || !room) return alert("名前と部屋ID必須");
+
+  currentRoom = room;
+  socket.emit("join", { room, name });
+
+  joinDiv.classList.add("hidden");
+  gameDiv.classList.remove("hidden");
+}
+
+function attack() {
+  socket.emit("attack", currentRoom);
+}
+
+socket.on("sync", (game) => {
+  playersDiv.innerHTML = "";
+  logUl.innerHTML = "";
+
+  game.players.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.innerText = `${i === game.turn ? "▶ " : ""}${p.name} HP:${p.hp}`;
+    playersDiv.appendChild(div);
+  });
+
+  turnH2.innerText = `ターン: ${game.players[game.turn]?.name}`;
+
+  game.log.slice(-5).forEach(l => {
     const li = document.createElement("li");
     li.innerText = l;
-    log.appendChild(li);
+    logUl.appendChild(li);
   });
 });
-
-function sendAction() {
-  socket.emit("action", "誰かが行動した！");
-}
