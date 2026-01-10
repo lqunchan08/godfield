@@ -1,29 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>Godfield</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div id="join">
-  <h1>Godfield</h1>
-  <input id="name" placeholder="名前">
-  <input id="room" placeholder="部屋ID">
-  <button onclick="join()">参加</button>
+<div id="card">
+  <img id="cardImg">
+  <div id="cardText"></div>
 </div>
-
-<div id="game" class="hidden">
-  <h2 id="turn"></h2>
-  <div id="players"></div>
-  <div id="card"></div>
-  <button id="useBtn" onclick="useCard()">カード使用</button>
-  <button onclick="start()">開始</button>
-  <ul id="log"></ul>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script src="main.js"></script>
-</body>
-</html>

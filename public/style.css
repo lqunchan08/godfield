@@ -1,32 +1,15 @@
-body{
-  background:radial-gradient(#333,#000);
-  color:white;
-  font-family:sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+@keyframes shake{
+  0%{transform:translate(0)}
+  25%{transform:translate(5px)}
+  50%{transform:translate(-5px)}
+  75%{transform:translate(5px)}
 }
-.hidden{display:none}
-#join,#game{
-  background:#111;
-  padding:20px;
-  border-radius:18px;
-  width:350px;
-  box-shadow:0 0 30px gold;
+.shake{animation:shake 0.4s}
+
+.flash{
+  animation:flash 0.3s;
 }
-button{
-  width:100%;
-  margin-top:8px;
-  padding:10px;
-  border-radius:10px;
-  font-weight:bold;
-}
-button:disabled{
-  background:#555;
-}
-#card{
-  font-size:20px;
-  text-align:center;
-  margin:10px 0;
+@keyframes flash{
+  from{background:#fff}
+  to{background:#000}
 }
