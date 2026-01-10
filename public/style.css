@@ -1,0 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 10px;
+  font-family: system-ui, sans-serif;
+  background: #0b0b0b;
+  color: #fff;
+}
+
+h1 {
+  text-align: center;
+  margin: 5px 0 10px;
+}
+
+#join {
+  display: flex;
+  gap: 5px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px;
+  font-size: 16px;
+}
+
+#turn {
+  text-align: center;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+#players {
+  border-top: 1px solid #333;
+  margin-top: 5px;
+}
+
+.player {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #222;
+}
+
+.player.dead {
+  opacity: 0.4;
+}
+
+.attack-btn {
+  background: #a00;
+  color: #fff;
+}
+
+#cards {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
+}
+
+.card {
+  width: 70px;
+  height: 70px;
+  font-size: 28px;
+  border-radius: 10px;
+}
+
+#logs {
+  background: #000;
+  padding: 6px;
+  height: 140px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+#spectator {
+  text-align: center;
+  color: #aaa;
+  margin: 5px 0;
+}

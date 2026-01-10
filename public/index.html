@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>God Field</title>
+</head>
+<body>
+  <h1>God Field</h1>
+
+  <input id="name" placeholder="名前">
+  <button onclick="join()">参加</button>
+  <button onclick="attack()">攻撃</button>
+
+  <h2>参加者</h2>
+  <ul id="players"></ul>
+
+  <h2>ログ</h2>
+  <ul id="log"></ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
