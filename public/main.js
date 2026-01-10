@@ -1,44 +1,40 @@
 const socket = io();
-let currentRoom = "";
-
-const joinDiv = document.getElementById("join");
-const gameDiv = document.getElementById("game");
-const playersDiv = document.getElementById("players");
-const logUl = document.getElementById("log");
-const turnH2 = document.getElementById("turn");
+let room = "";
 
 function join() {
   const name = document.getElementById("name").value;
-  const room = document.getElementById("room").value;
+  room = document.getElementById("room").value;
 
-  if (!name || !room) return alert("名前と部屋ID必須");
-
-  currentRoom = room;
   socket.emit("join", { room, name });
-
-  joinDiv.classList.add("hidden");
-  gameDiv.classList.remove("hidden");
+  document.getElementById("join").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
 }
 
-function attack() {
-  socket.emit("attack", currentRoom);
+function startGame() {
+  socket.emit("start", room);
 }
 
-socket.on("sync", (game) => {
-  playersDiv.innerHTML = "";
-  logUl.innerHTML = "";
+function useCard() {
+  socket.emit("useCard", room);
+}
+
+socket.on("sync", game => {
+  document.getElementById("players").innerHTML = "";
+  document.getElementById("log").innerHTML = "";
 
   game.players.forEach((p, i) => {
-    const div = document.createElement("div");
-    div.innerText = `${i === game.turn ? "▶ " : ""}${p.name} HP:${p.hp}`;
-    playersDiv.appendChild(div);
+    const d = document.createElement("div");
+    d.innerText = `${i === game.turn ? "▶ " : ""}${p.name} HP:${p.hp} 🛡${p.guard} ${p.alive ? "" : "☠"}`;
+    document.getElementById("players").appendChild(d);
   });
 
-  turnH2.innerText = `ターン: ${game.players[game.turn]?.name}`;
+  const me = game.players[game.turn];
+  document.getElementById("turn").innerText = `ターン: ${me?.name}`;
+  document.getElementById("card").innerText = me?.card ? `🃏 ${me.card.name}` : "";
 
-  game.log.slice(-5).forEach(l => {
+  game.log.slice(-6).forEach(l => {
     const li = document.createElement("li");
     li.innerText = l;
-    logUl.appendChild(li);
+    document.getElementById("log").appendChild(li);
   });
 });

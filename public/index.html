@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Godfield Online</title>
+  <title>Godfield</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,7 +17,9 @@
 <div id="game" class="hidden">
   <h2 id="turn"></h2>
   <div id="players"></div>
-  <button onclick="attack()">攻撃</button>
+  <div id="card"></div>
+  <button onclick="useCard()">カード使用</button>
+  <button onclick="startGame()">開始</button>
   <ul id="log"></ul>
 </div>
 

@@ -1,5 +1,5 @@
 body {
-  background: radial-gradient(#333, #000);
+  background: radial-gradient(#222, #000);
   color: #fff;
   font-family: sans-serif;
   display: flex;
@@ -8,38 +8,27 @@ body {
   height: 100vh;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 #join, #game {
-  background: #222;
+  background: #111;
   padding: 20px;
   border-radius: 16px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 0 20px #000;
-}
-
-input, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  border: none;
+  width: 340px;
+  box-shadow: 0 0 30px #000;
 }
 
 button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
   background: gold;
+  border: none;
+  border-radius: 8px;
   font-weight: bold;
-  cursor: pointer;
 }
 
-#players div {
-  margin-top: 5px;
-}
-
-ul {
-  text-align: left;
+#card {
   margin-top: 10px;
+  font-size: 20px;
 }
