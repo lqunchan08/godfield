@@ -1,40 +1,38 @@
 const socket = io();
-let room = "";
+let room="", myId="";
 
-function join() {
-  const name = document.getElementById("name").value;
-  room = document.getElementById("room").value;
+socket.on("connect",()=>myId=socket.id);
 
-  socket.emit("join", { room, name });
+function join(){
+  room=document.getElementById("room").value;
+  socket.emit("join",{room,name:document.getElementById("name").value});
   document.getElementById("join").classList.add("hidden");
   document.getElementById("game").classList.remove("hidden");
 }
 
-function startGame() {
-  socket.emit("start", room);
-}
+function start(){ socket.emit("start",room); }
+function useCard(){ socket.emit("useCard",room); }
 
-function useCard() {
-  socket.emit("useCard", room);
-}
+socket.on("sync",g=>{
+  const players=document.getElementById("players");
+  const log=document.getElementById("log");
+  players.innerHTML=""; log.innerHTML="";
 
-socket.on("sync", game => {
-  document.getElementById("players").innerHTML = "";
-  document.getElementById("log").innerHTML = "";
-
-  game.players.forEach((p, i) => {
-    const d = document.createElement("div");
-    d.innerText = `${i === game.turn ? "▶ " : ""}${p.name} HP:${p.hp} 🛡${p.guard} ${p.alive ? "" : "☠"}`;
-    document.getElementById("players").appendChild(d);
+  g.players.forEach((p,i)=>{
+    const d=document.createElement("div");
+    d.innerText=`${i===g.turn?"▶ ":""}${p.name} HP:${p.hp} ${p.alive?"":"☠"}`;
+    players.appendChild(d);
   });
 
-  const me = game.players[game.turn];
-  document.getElementById("turn").innerText = `ターン: ${me?.name}`;
-  document.getElementById("card").innerText = me?.card ? `🃏 ${me.card.name}` : "";
+  const me=g.players[g.turn];
+  document.getElementById("turn").innerText=`ターン：${me?.name}`;
+  document.getElementById("card").innerText=me?.card?`🃏 ${me.card.name}`:"";
 
-  game.log.slice(-6).forEach(l => {
-    const li = document.createElement("li");
-    li.innerText = l;
-    document.getElementById("log").appendChild(li);
+  document.getElementById("useBtn").disabled = me?.id !== myId;
+
+  g.log.slice(-6).forEach(l=>{
+    const li=document.createElement("li");
+    li.innerText=l;
+    log.appendChild(li);
   });
 });
