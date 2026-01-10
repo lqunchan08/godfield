@@ -1,36 +1,38 @@
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
-const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const server = http.createServer(app);
+const io = new Server(server);
 
 app.use(express.static("public"));
 
-const rooms = {};
+let players = [];
+let gameState = {
+  turn: 0,
+  log: []
+};
 
 io.on("connection", (socket) => {
-  socket.on("join", ({ room, name }) => {
-    socket.join(room);
+  console.log("接続:", socket.id);
 
-    if (!rooms[room]) rooms[room] = [];
-    rooms[room].push({ id: socket.id, name, hp: 100 });
+  players.push(socket.id);
 
-    io.to(room).emit("update", rooms[room]);
+  io.emit("sync", { players, gameState });
+
+  socket.on("action", (msg) => {
+    gameState.log.push(msg);
+    gameState.turn = (gameState.turn + 1) % players.length;
+    io.emit("sync", { players, gameState });
   });
 
-  socket.on("attack", (room) => {
-    const players = rooms[room];
-    if (!players || players.length < 2) return;
-
-    const target = players.find(p => p.id !== socket.id);
-    if (!target) return;
-
-    target.hp -= 10;
-    io.to(room).emit("log", `${target.name} に10ダメージ！`);
-    io.to(room).emit("update", players);
+  socket.on("disconnect", () => {
+    players = players.filter(id => id !== socket.id);
+    io.emit("sync", { players, gameState });
   });
 });
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-  console.log("起動：http://localhost:" + PORT);
+server.listen(process.env.PORT || 10000, () => {
+  console.log("Server running");
 });
