@@ -1,55 +1,40 @@
 const socket = io();
 
 
-function join() {
-const name = document.getElementById("name").value;
-socket.emit("join", name);
-}
+const joinBtn = document.getElementById("join");
+const startBtn = document.getElementById("start");
+const field = document.getElementById("field");
+const lobby = document.getElementById("lobby");
+const msg = document.getElementById("msg");
+const handDiv = document.getElementById("hand");
 
 
-function startGame() {
-socket.emit("startGame");
-}
+joinBtn.onclick = () => {
+socket.emit("join");
+joinBtn.style.display = "none";
+};
 
 
-socket.on("errorMsg", msg => alert(msg));
+startBtn.onclick = () => socket.emit("start");
 
 
-socket.on("state", state => {
-document.getElementById("players").innerHTML = state.players
-.map((p, i) => `${i === state.turnIndex ? "👉" : ""}${p.name} HP:${p.hp}`)
-.join("<br>");
-
-
-const me = state.players.find(p => p.id === socket.id);
-const hand = document.getElementById("hand");
-hand.innerHTML = "";
-
-
-if (!me) return;
-
-
-me.hand.forEach((c, i) => {
-const box = document.createElement("div");
-box.className = "cardBox";
-
-
-const img = document.createElement("img");
-img.src = `cards/${c.type}.png`;
-img.className = "card";
-img.onclick = () => socket.emit("play", i);
-
-
-const power = document.createElement("div");
-power.className = "cardPower";
-power.innerText = `攻${c.power}`;
-
-
-box.appendChild(img);
-box.appendChild(power);
-hand.appendChild(box);
+socket.on("startGame", () => {
+msg.innerText = "ゲームスタート！";
 });
 
 
-document.getElementById("startBtn").disabled = state.players.length < 2;
+socket.on("state", state => {
+if (state.started) {
+lobby.classList.add("hidden");
+field.classList.remove("hidden");
+const me = state.players.find(p => p.id === socket.id);
+if (!me) return;
+handDiv.innerHTML = "";
+me.hand.forEach((c, i) => {
+const d = document.createElement("div");
+d.className = "card";
+d.innerHTML = `<img src="cards/${c.name}.png" width="50"><div>${c.power}</div>`;
+handDiv.appendChild(d);
+});
+}
 });
