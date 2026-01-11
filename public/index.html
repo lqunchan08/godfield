@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Godfield</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="join">
-<input id="name" placeholder="名前" />
+<div id="app">
+<h1>Godfield</h1>
+
+
+<input id="name" placeholder="名前">
 <button onclick="join()">参加</button>
-</div>
+<button id="startBtn" onclick="startGame()">開始</button>
 
 
-<div id="game" hidden>
 <div id="players"></div>
-<div id="hand"></div>
-<div id="log"></div>
-<input id="chat" placeholder="チャット" />
-<button onclick="sendChat()">送信</button>
+<div id="hand" class="card-container"></div>
 </div>
 
 
