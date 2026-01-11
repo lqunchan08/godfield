@@ -1,40 +1,51 @@
 const socket = io();
 
-
-const joinBtn = document.getElementById("join");
-const startBtn = document.getElementById("start");
-const field = document.getElementById("field");
-const lobby = document.getElementById("lobby");
-const msg = document.getElementById("msg");
+const join = document.getElementById("join");
+const joinBtn = document.getElementById("joinBtn");
+const nameInput = document.getElementById("nameInput");
+const startBtn = document.getElementById("startBtn");
+const playersDiv = document.getElementById("players");
 const handDiv = document.getElementById("hand");
 
-
 joinBtn.onclick = () => {
-socket.emit("join");
-joinBtn.style.display = "none";
+  if (!nameInput.value) return;
+  socket.emit("join", nameInput.value);
+  join.style.display = "none";
 };
 
+startBtn.onclick = () => {
+  socket.emit("start");
+};
 
-startBtn.onclick = () => socket.emit("start");
-
-
-socket.on("startGame", () => {
-msg.innerText = "ゲームスタート！";
+socket.on("started", () => {
+  startBtn.style.display = "none";
 });
 
+socket.on("state", ({ players }) => {
+  playersDiv.innerHTML = "";
+  handDiv.innerHTML = "";
 
-socket.on("state", state => {
-if (state.started) {
-lobby.classList.add("hidden");
-field.classList.remove("hidden");
-const me = state.players.find(p => p.id === socket.id);
-if (!me) return;
-handDiv.innerHTML = "";
-me.hand.forEach((c, i) => {
-const d = document.createElement("div");
-d.className = "card";
-d.innerHTML = `<img src="cards/${c.name}.png" width="50"><div>${c.power}</div>`;
-handDiv.appendChild(d);
-});
-}
+  Object.values(players).forEach(p => {
+    const box = document.createElement("div");
+    box.className = "player";
+
+    box.innerHTML = `
+      <div class="name">${p.name}</div>
+      <div class="hp">HP ${p.hp} / ${p.maxHp}</div>
+    `;
+    playersDiv.appendChild(box);
+
+    if (p.id === socket.id) {
+      p.hand.forEach((card, i) => {
+        const c = document.createElement("div");
+        c.className = "card";
+        c.innerHTML = `
+          <div class="cardType">${card.type}</div>
+          <div class="cardPower">${card.power}</div>
+        `;
+        c.onclick = () => socket.emit("play", i);
+        handDiv.appendChild(c);
+      });
+    }
+  });
 });

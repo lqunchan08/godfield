@@ -1,27 +1,59 @@
 body {
-margin: 0;
-background: black;
-color: white;
-font-family: sans-serif;
+  background: black;
+  color: white;
+  margin: 0;
+  font-family: sans-serif;
+  text-align: center;
 }
-#screen {
-display: flex;
-flex-direction: column;
-align-items: center;
+
+#join {
+  margin-top: 40px;
 }
+
+#players {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.player {
+  border: 1px solid white;
+  padding: 10px;
+  margin: 5px;
+  width: 140px;
+}
+
+.name {
+  font-size: 18px;
+}
+
+.hp {
+  margin-top: 5px;
+}
+
 #hand {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-gap: 8px;
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
+
 .card {
-width: 80px;
-height: 80px;
-background: #222;
-border: 2px solid white;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 2px solid white;
+  margin: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-.hidden { display: none; }
+
+.cardType {
+  font-size: 14px;
+}
+
+.cardPower {
+  font-size: 12px;
+}
