@@ -1,28 +1,7 @@
 body {
-  background: black;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+background:black;
+color:white;
+text-align:center;
 }
-
-#game {
-  text-align: center;
-}
-
-img {
-  width: 120px;
-}
-
-.explosion {
-  animation: shake 0.3s;
-}
-
-@keyframes shake {
-  0% { transform: translate(0); }
-  25% { transform: translate(-5px,5px); }
-  50% { transform: translate(5px,-5px); }
-  100% { transform: translate(0); }
-}
+button { font-size:16px; }
+.player.turn { border:2px solid yellow; }
