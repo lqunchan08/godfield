@@ -10,105 +10,84 @@ app.use(express.static("public"));
 
 const rooms = {};
 
-// 🎴 カード100種対応テンプレ
-const CARDS = [
-  { type: "attack", power: 10, rate: 20 },
-  { type: "attack", power: 20, rate: 10 },
-  { type: "attack", power: 30, rate: 5 },
-
-  { type: "heal", power: 10, rate: 15 },
-  { type: "heal", power: 20, rate: 10 },
-
-  { type: "guard", power: 10, rate: 15 },
-  { type: "guard", power: 20, rate: 10 },
-
-  { type: "mystery", rate: 15 }
-
-  // 👇 ここに増やすだけで100種完成
+// 🎴 カード100種（確率寄せ・効果は安定重視）
+const CARD_POOL = [
+  ...Array(40).fill({ type: "attack", power: 10 }),
+  ...Array(25).fill({ type: "heal", power: 8 }),
+  ...Array(20).fill({ type: "guard", power: 6 }),
+  ...Array(15).fill({ type: "special", power: 15 }) // 不思議な力枠
 ];
 
-function drawCard() {
-  const total = CARDS.reduce((s, c) => s + c.rate, 0);
-  let r = Math.random() * total;
-  for (const c of CARDS) {
-    r -= c.rate;
-    if (r <= 0) return { ...c };
-  }
-}
+const drawCard = () =>
+  JSON.parse(JSON.stringify(
+    CARD_POOL[Math.floor(Math.random() * CARD_POOL.length)]
+  ));
 
 io.on("connection", socket => {
 
-  socket.on("join", roomId => {
-    socket.join(roomId);
-
-    if (!rooms[roomId]) {
-      rooms[roomId] = { players: [], turn: 0, log: [] };
+  socket.on("join", room => {
+    socket.join(room);
+    if (!rooms[room]) {
+      rooms[room] = { players: [], turn: 0, effect: null };
     }
 
-    rooms[roomId].players.push({
+    rooms[room].players.push({
       id: socket.id,
       hp: 100,
-      guard: 0,
       card: null
     });
 
-    io.to(roomId).emit("state", rooms[roomId]);
+    io.to(room).emit("state", rooms[room]);
   });
 
-  socket.on("draw", roomId => {
-    const room = rooms[roomId];
-    const p = room.players[room.turn];
-    if (p.id !== socket.id) return;
+  socket.on("draw", room => {
+    const r = rooms[room];
+    if (!r) return;
+    if (r.players[r.turn].id !== socket.id) return;
 
+    const p = r.players.find(p => p.id === socket.id);
     p.card = drawCard();
-    io.to(roomId).emit("state", room);
+    io.to(room).emit("state", r);
   });
 
-  socket.on("use", ({ roomId, targetId }) => {
-    const room = rooms[roomId];
-    const p = room.players[room.turn];
-    if (p.id !== socket.id || !p.card) return;
+  socket.on("use", ({ room, targetId }) => {
+    const r = rooms[room];
+    if (!r) return;
 
-    const t = room.players.find(x => x.id === targetId);
-    const c = p.card;
+    const me = r.players[r.turn];
+    if (me.id !== socket.id || !me.card) return;
 
-    if (c.type === "attack") {
-      const dmg = Math.max(0, c.power - t.guard);
-      t.hp -= dmg;
-      t.guard = 0;
-      room.log.push(`💥 ${dmg}ダメージ`);
+    const target = r.players.find(p => p.id === targetId);
+    if (!target) return;
+
+    // 効果処理
+    if (me.card.type === "attack") {
+      target.hp -= me.card.power;
+      r.effect = "shake";
     }
 
-    if (c.type === "heal") {
-      p.hp = Math.min(100, p.hp + c.power);
-      room.log.push(`✨ 回復 ${c.power}`);
+    if (me.card.type === "heal") {
+      me.hp += me.card.power;
+      r.effect = "flash";
     }
 
-    if (c.type === "guard") {
-      p.guard += c.power;
-      room.log.push(`🛡 防御 ${c.power}`);
+    if (me.card.type === "guard") {
+      me.hp += me.card.power;
     }
 
-    if (c.type === "mystery") {
-      const r = Math.random();
-      if (r < 0.33) {
-        p.hp += 30;
-        room.log.push("🌈 不思議な力：超回復");
-      } else if (r < 0.66) {
-        t.hp -= 25;
-        room.log.push("🔥 不思議な力：爆発");
-      } else {
-        p.guard += 30;
-        room.log.push("🔮 不思議な力：結界");
-      }
+    if (me.card.type === "special") {
+      target.hp -= me.card.power;
+      r.effect = "flash";
     }
 
-    room.players = room.players.filter(pl => pl.hp > 0);
-    room.turn = (room.turn + 1) % room.players.length;
-    p.card = null;
+    me.card = null;
+    r.turn = (r.turn + 1) % r.players.length;
 
-    io.to(roomId).emit("state", room);
+    io.to(room).emit("state", r);
+    r.effect = null;
   });
 });
 
-server.listen(3000);
+server.listen(3000, () =>
+  console.log("Server running http://localhost:3000")
+);

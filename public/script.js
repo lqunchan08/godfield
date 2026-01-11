@@ -1,47 +1,65 @@
 const socket = io();
-let roomId = "";
+const room = new URLSearchParams(location.search).get("room") || "default";
 
-const sounds = {
-  attack: new Audio("sounds/attack.mp3"),
-  heal: new Audio("sounds/heal.mp3"),
-  mystery: new Audio("sounds/mystery.mp3")
-};
+const joinBtn = document.getElementById("joinBtn");
+const drawBtn = document.getElementById("drawBtn");
+const useBtn = document.getElementById("useBtn");
+const status = document.getElementById("status");
+const cardImg = document.getElementById("cardImg");
+const cardText = document.getElementById("cardText");
+const targets = document.getElementById("targets");
+const game = document.getElementById("game");
 
-document.getElementById("join").onclick = () => {
-  roomId = room.value;
-  socket.emit("join", roomId);
-};
+let selectedTarget = null;
 
-document.getElementById("draw").onclick = () => {
-  socket.emit("draw", roomId);
+joinBtn.onclick = () => socket.emit("join", room);
+drawBtn.onclick = () => socket.emit("draw", room);
+useBtn.onclick = () => {
+  if (selectedTarget) {
+    socket.emit("use", { room, targetId: selectedTarget });
+  }
 };
 
 socket.on("state", state => {
   const me = state.players.find(p => p.id === socket.id);
-  document.getElementById("turn").innerText =
-    `ターン：${state.players[state.turn]?.id === socket.id ? "あなた" : "相手"}`;
+  if (!me) return;
 
-  const img = document.getElementById("cardImg");
-  if (me?.card) {
-    img.src = `cards/${me.card.type}.png`;
-    sounds[me.card.type]?.play();
-  } else img.src = "";
+  // ターン表示
+  status.innerText =
+    `HP: ${me.hp}\n` +
+    (state.players[state.turn].id === socket.id
+      ? "あなたのターン"
+      : "相手のターン");
 
-  const players = document.getElementById("players");
-  players.innerHTML = "";
+  drawBtn.disabled = state.players[state.turn].id !== socket.id;
+  useBtn.disabled = !me.card || drawBtn.disabled;
 
+  // カード表示
+  if (me.card) {
+    cardImg.src = `cards/${me.card.type}.png`;
+    cardText.innerText = me.card.type;
+  } else {
+    cardImg.src = "";
+    cardText.innerText = "";
+  }
+
+  // 🎯 攻撃対象選択
+  targets.innerHTML = "";
   state.players.forEach(p => {
-    const b = document.createElement("button");
-    b.innerText = `HP:${p.hp}`;
-    b.disabled = !me?.card || state.players[state.turn].id !== socket.id;
-    b.onclick = () =>
-      socket.emit("use", { roomId, targetId: p.id });
-    players.appendChild(b);
+    if (p.id === me.id) return;
+    const btn = document.createElement("button");
+    btn.innerText = `HP:${p.hp}`;
+    btn.onclick = () => selectedTarget = p.id;
+    targets.appendChild(btn);
   });
 
-  document.body.classList.add("flash");
-  setTimeout(() => document.body.classList.remove("flash"), 300);
-
-  document.getElementById("log").innerHTML =
-    state.log.slice(-5).join("<br>");
+  // 💥 エフェクト
+  if (state.effect === "shake") {
+    game.classList.add("shake");
+    setTimeout(() => game.classList.remove("shake"), 300);
+  }
+  if (state.effect === "flash") {
+    game.classList.add("flash");
+    setTimeout(() => game.classList.remove("flash"), 300);
+  }
 });

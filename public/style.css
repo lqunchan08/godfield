@@ -1,18 +1,53 @@
-body.flash {
-  animation: flash 0.3s;
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-@keyframes flash {
-  from { background: white; }
-  to { background: black; }
+#game {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
 }
 
-#card img {
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  font-size: 16px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+img {
   width: 120px;
+  margin: 10px 0;
+}
+
+.shake {
   animation: shake 0.3s;
 }
 
 @keyframes shake {
+  0% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
   50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.flash {
+  animation: flash 0.3s;
+}
+
+@keyframes flash {
+  0% { background: #000; }
+  50% { background: #fff; color: #000; }
+  100% { background: #000; }
 }
