@@ -2,64 +2,65 @@ const socket = io();
 const room = new URLSearchParams(location.search).get("room") || "default";
 
 const joinBtn = document.getElementById("joinBtn");
-const drawBtn = document.getElementById("drawBtn");
-const useBtn = document.getElementById("useBtn");
 const status = document.getElementById("status");
-const cardImg = document.getElementById("cardImg");
-const cardText = document.getElementById("cardText");
+const handDiv = document.getElementById("hand");
 const targets = document.getElementById("targets");
 const game = document.getElementById("game");
 
+const sounds = {
+  attack: new Audio("sounds/attack.mp3"),
+  heal: new Audio("sounds/heal.mp3"),
+  special: new Audio("sounds/special.mp3")
+};
+
+let selectedCard = null;
 let selectedTarget = null;
 
-joinBtn.onclick = () => socket.emit("join", room);
-drawBtn.onclick = () => socket.emit("draw", room);
-useBtn.onclick = () => {
-  if (selectedTarget) {
-    socket.emit("use", { room, targetId: selectedTarget });
-  }
+joinBtn.onclick = () => {
+  socket.emit("join", room);
+  joinBtn.style.display = "none"; // ★参加後消える
 };
 
 socket.on("state", state => {
   const me = state.players.find(p => p.id === socket.id);
   if (!me) return;
 
-  // ターン表示
   status.innerText =
-    `HP: ${me.hp}\n` +
+    `HP:${me.hp}\n` +
     (state.players[state.turn].id === socket.id
       ? "あなたのターン"
       : "相手のターン");
 
-  drawBtn.disabled = state.players[state.turn].id !== socket.id;
-  useBtn.disabled = !me.card || drawBtn.disabled;
+  // 手札表示
+  handDiv.innerHTML = "";
+  me.hand.forEach((c, i) => {
+    const img = document.createElement("img");
+    img.src = `cards/${c.type}.png`;
+    img.onclick = () => selectedCard = i;
+    handDiv.appendChild(img);
+  });
 
-  // カード表示
-  if (me.card) {
-    cardImg.src = `cards/${me.card.type}.png`;
-    cardText.innerText = me.card.type;
-  } else {
-    cardImg.src = "";
-    cardText.innerText = "";
-  }
-
-  // 🎯 攻撃対象選択
+  // 対象選択
   targets.innerHTML = "";
   state.players.forEach(p => {
     if (p.id === me.id) return;
-    const btn = document.createElement("button");
-    btn.innerText = `HP:${p.hp}`;
-    btn.onclick = () => selectedTarget = p.id;
-    targets.appendChild(btn);
+    const b = document.createElement("button");
+    b.innerText = `HP:${p.hp}`;
+    b.onclick = () => {
+      selectedTarget = p.id;
+      socket.emit("use", { room, cardIndex: selectedCard, targetId: selectedTarget });
+    };
+    targets.appendChild(b);
   });
 
-  // 💥 エフェクト
-  if (state.effect === "shake") {
-    game.classList.add("shake");
-    setTimeout(() => game.classList.remove("shake"), 300);
+  // 効果音
+  if (state.effect && sounds[state.effect]) {
+    sounds[state.effect].play();
   }
-  if (state.effect === "flash") {
-    game.classList.add("flash");
-    setTimeout(() => game.classList.remove("flash"), 300);
+
+  // 演出
+  if (state.effect) {
+    game.classList.add(state.effect);
+    setTimeout(() => game.classList.remove(state.effect), 400);
   }
 });

@@ -1,29 +1,24 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Godfield</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<title>Godfield</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game">
-    <h1>GODFIELD</h1>
 
-    <button id="joinBtn">参加</button>
+<div id="game">
+  <button id="joinBtn">参加</button>
 
-    <div id="status"></div>
-
+  <div id="cardArea">
     <img id="cardImg">
     <div id="cardText"></div>
-
-    <div id="targets"></div>
-
-    <button id="drawBtn">カードを引く</button>
-    <button id="useBtn">カードを使う</button>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+  <div id="players"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
